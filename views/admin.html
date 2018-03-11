@@ -1,0 +1,15 @@
+{{!< layout/default}}
+
+{{#extend "css"}}
+
+{{/extend}}
+
+{{#extend "js"}}
+<script>
+    ajax({
+        url: '/api/test'
+    }).then(data=>{
+        console.log(data)
+    })
+</script>
+{{/extend}}

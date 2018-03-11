@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Michcom intranet</title>
+    <link rel="stylesheet" href="/public/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <style>
+
+        body {
+            margin: 0;
+            padding: 0;
+            /*  Background fallback in case of IE8 & down, or in case video doens't load, such as with slower connections  */
+            background: #333;
+            background-attachment: fixed;
+            background-size: cover;
+
+            background-image: url("/public/img/wallpaper.jpg");
+            background-repeat: no-repeat;
+        }
+
+        /* The only rule that matters */
+        #video-background {
+            /*  making the video fullscreen  */
+            position: fixed;
+            right: 0; 
+            bottom: 0;
+            min-width: 100%; 
+            min-height: 100%;
+            width: auto; 
+            height: auto;
+            z-index: -100;
+        }
+
+
+         #loginContainer {
+            background: rgba(0,0,0,0.2);
+            color:rgba(255,255,255,0.8);
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            top:0;
+            left:0;
+         }
+
+         #logo{
+          margin-top:10%;
+         }
+
+         #logo img {
+            max-height: 100px;
+            max-width:40%;
+         }
+
+         #forms {
+            margin-left: 20px;
+            margin-right: 20px;
+         }
+
+         .input-group input {
+             color:white !important;
+             font-size: 25px !important;
+             text-align: center;
+         }
+    </style>
+</head>
+<body>
+ 
+<div class="container-fluid">
+        <video autoplay loop id="video-background" muted plays-inline>
+            <source src="/public/video/login.mp4" type="video/mp4">
+        </video>
+    <div id="loginContainer">
+        <center>  
+        <div id="logo">
+            <img src="/public/img/logo2.png" alt="">
+        </div>
+        <br>
+        <h1>LOGIN</h1>
+        </center>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <form method="post" action="/login">
+                    <div id="forms">
+                        <div class="input-group margin-bottom-sm">
+                            <span class="input-group-addon"><br><i class="fa fa-2x fa-envelope-o fa-fw"></i></span>
+                            <input id="email" name="email" class="form-control" type="text" placeholder="Email">
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon"><br><i class="fa fa-2x fa-key fa-fw"></i></span>
+                            <input id="password" name="password" class="form-control" type="password" placeholder="Contraseña">
+                        </div>
+                        <br>
+                        {{#if message}}
+                        <div class="alert alert-dismissible alert-warning">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{message}}
+                        </div>
+                        <br>
+                        {{/if}}
+                        <input type="submit" class="btn btn-primary btn-block" value="Iniciar sesión">
+                        <br>
+                        <br>
+                        <br>
+                        <center>  ©2018 Flight. </center>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+        
+    </div>
+</div>
+
+<script src="/public/js/jquery.min.js"></script>
+<script src="/public/js/popper.min.js"></script>
+<script src="/public/js/bootstrap.min.js"></script>
+<!--<script src="/public/js/default.js"></script>-->
+<script>
+
+$(document).ready(function() {
+    $('#email').focus();
+    var vid = document.getElementById("video-background");
+    vid.playbackRate = 0.8;
+});
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
+</script>
+</body>
+</html>

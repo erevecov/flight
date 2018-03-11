@@ -8,6 +8,9 @@ const Test = [{ // ver todos
     method: 'GET',
     path: '/api/test',
     options: {
+        description: 'GET test array',
+        notes: 'Retorna un arreglo de documentos de tipo test',
+        tags: ['api'], // Hay que añadir esta linea para que se agregue a la documentación 
         handler: async (request, h) => {
             return new Promise(resolve=>{
                 db.find({

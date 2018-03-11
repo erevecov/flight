@@ -9,13 +9,8 @@
     "stop": "pm2 stop basic_hapi17",
     "restart": "npm stop && npm start"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://ereveco@bitbucket.org/ereveco/basic_hapi17.git"
-  },
   "author": "Eduardo Reveco Villalobos",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/ereveco/basic_hapi17#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",

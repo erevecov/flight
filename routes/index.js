@@ -3,8 +3,10 @@ import logoutHandler from './handlers/logoutHandler';
 
 import Home from './home';
 import Admin from './admin';
+import mUsers from './m_users'; // Mantenedor usuarios
 
 import APITest from './api/test';
+import APIMUsers from './api/m_users';
 
 const Login = {
   method: ['GET', 'POST'],
@@ -45,7 +47,9 @@ const Routes = [].concat(
     Logout,
     Home,
     Admin,
-    APITest
+    mUsers,
+    APITest,
+    APIMUsers
 );
 
 export default Routes;

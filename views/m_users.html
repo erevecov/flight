@@ -26,13 +26,17 @@
 
 	</div>
 
-	<div class="col-md-4 col-sm-12 col-xs-12">
+	<div class="col-md-2 col-sm-12 col-xs-12">
+
+       </div>
+       
+       <div class="col-md-4 col-sm-12 col-xs-12">
 		<br><br>
 			<button type="button" id="btnGuardar" value="Guardar" class="btn btn-success fa fa-2x fa-floppy-o btn-block"> Guardar</button>
 		<br>
     	<button type="button" id="btnEliminar" value="Eliminar" class="btn btn-danger fa fa-2x fa-trash-o btn-block" > Eliminar</button>
     	<br>
-    	<button type="button" id="btnModificar" value="Modificar" class="btn btn-warning fa fa-2x fa-pencil-square-o btn-block" onclick=Modificar_U() > Modificar</button>
+    	<button type="button" id="btnModificar" value="Modificar" class="btn btn-warning fa fa-2x fa-pencil-square-o btn-block" () > Modificar</button>
     	<br>
     	<button type="button" id="btnNuevo" value="Nuevo" class="btn btn-warning fa fa-2x fa-file-o btn-block" > Nuevo</button>
    	</div>
@@ -78,24 +82,39 @@
     });
 
 
-    function saveUser(name, lastname, Email, DNI, userType, phone, pass) {
-        //console.log(phonex)
+    function saveUser() {
+        var name = document.getElementById("txtNombres").value
+        var lastname = document.getElementById("txtApellidos").value
+        var Email = document.getElementById("txtEmail").value 
+        var DNI = document.getElementById("txtRut").value
+        var pass = document.getElementById("txtContraseña").value
+        var userType = document.getElementById("cboTipoUsuario").value 
+        var phone = document.getElementById("txtTelefono").value 
 
-        ajax({
-            url: '/api/createUser',
-            type: 'POST',
-            data: {
-                dni: DNI,
-                name: name,
-                lastname: lastname,
-                email: Email,
-                password: pass,
-                userType: userType,
-                phone: phone
-            }
-        }).then(data=>{
-            console.log(data)
-        })
+        //console.log(phone)
+        //console.log('------')
+        if(name == "" || lastname=="" || Email=="" || DNI=="" || pass=="" || userType=="" || phone=="" ){
+            alert("faltan campos por completar")
+        }else{
+            //console.log("todos los campos OK")
+             ajax({
+                url: '/api/createUser',
+                type: 'POST',
+                data: {
+                    dni: DNI,
+                    name: name,
+                    lastname: lastname,
+                    email: Email,
+                    password: pass,
+                    userType: userType,
+                    phone: phone
+                }
+            }).then(data=>{
+                console.log(data)
+            })
+        }
+
+       
         
     }
 
@@ -132,7 +151,7 @@
 	    			"columnDefs": [
 	            		{"targets": [ 0,1 ],
 	                 	"visible": false,
-	                 	"searchable": true},
+	                 	"searchable": false},
 	        		],
 		    		"select":
 		    			{style: 'single'}
@@ -182,24 +201,30 @@
         document.getElementById("txtTelefono").value = ""
     }
 
-    $('#btnGuardar').on('click', function(){
-        var name = document.getElementById("txtNombres").value
-        var lastname = document.getElementById("txtApellidos").value
-        var Email = document.getElementById("txtEmail").value 
-        var DNI = document.getElementById("txtRut").value
-        var pass = document.getElementById("txtContraseña").value
-        var userType = document.getElementById("cboTipoUsuario").value 
-        var phone = document.getElementById("txtTelefono").value 
+    function DeleteUser(id, rev){
+            $.ajax({
+                url: '/api/deleteUser',
+                type: 'DELETE',
+                data: {id, rev},
+                beforeSend: function(){
+                    //$('#loading').append('<img src="/public/images/loading3.gif" height=200 width=250>');
+                }
+            })
+            .done(function() {
+               // console.log(data)
+                //table.row('.selected').remove().draw( false );
+                console.log("se elimino")
+                    //////creacion del log
+               // createLog("delete","se elimino usuario " + id, "User")
 
-        //console.log(phone)
-        //console.log('------')
-        if(name == "" || lastname=="" || Email=="" || DNI=="" || pass=="" || userType=="" || phone=="" ){
-            alert("faltan campos por completar")
-        }else{
-            //console.log("todos los campos OK")
-            saveUser(name, lastname, Email, DNI, userType, phone, pass);
-        }
-       
+            })
+            .fail(function() {
+                console.log("error al eliminar usuario =S");
+            });
+    }
+
+    $('#btnGuardar').on('click', function(){
+            saveUser();
     })
 
     $('#btnEliminar').on('click', function(){
@@ -215,6 +240,22 @@
 
     $('#btnNuevo').on('click', function(){
       clearUsers()
+    })
+
+    $('#btnModificar').on('click', function(){
+       // modifyUser
+       var Email = document.getElementById("txtEmail").value
+       var Rev = ""
+       console.log(jsonUsers) 
+       //
+       for(var i in jsonUsers){
+            if (Email==jsonUsers[i]["_id"]){
+                Rev = jsonUsers[i]["_rev"]
+            }
+       }
+       DeleteUser(Email, Rev)
+       saveUser()
+
     })
 
 

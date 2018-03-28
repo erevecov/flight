@@ -154,6 +154,32 @@ const Users = [
         })
       }
     }
+  },
+  { 
+
+  //elimina de un usuario ////////////////////////
+      method: 'DELETE',
+      path: '/api/deleteUser',
+      config: {
+          handler: (request, reply) => {
+              let id = request.payload.id;
+              let rev = request.payload.rev;
+              db.destroy(id, rev, function(err, result, header) {
+                  if (!err) {
+                     // return reply(result);
+                      console.log("Successfully deleted doc", id);
+                  }
+              });
+
+          },
+          validate: {
+              payload: Joi.object().keys({
+                  id: Joi.string(),
+                  rev: Joi.string()
+              })
+
+          }
+      }
   }
 ];
 

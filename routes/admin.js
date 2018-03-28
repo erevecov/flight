@@ -1,3 +1,5 @@
+
+
 const Home = {
     method: ["GET"],
     path: "/admin",

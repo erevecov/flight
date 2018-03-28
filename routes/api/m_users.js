@@ -6,6 +6,36 @@ import configEnv from "../../config/env_status.js";
 let db = cloudant.db.use(configEnv.db);
 
 const Users = [
+  { // listar usuarios del sistema
+    method: 'GET',
+    path: '/api/listUsers',
+    options: {
+        description: 'GET test array',
+        notes: 'Retorna listado de usuarios del sistema',
+        tags: ['api'], // Hay que añadir esta linea para que se agregue a la documentación 
+        handler: async (request, h) => {
+            return new Promise(resolve=>{
+                db.find({
+                    'selector': {
+                        '_id': {
+                            '$gte': null
+                        },
+                        'type': 'user'
+                    },
+                    "fields": ["_id","_rev",'DNI','status', "name", "lastname", "email","userType", "password", "phone"]
+                }, (err, result) => {
+                    if (err) throw err;
+                    
+                    if(result.docs[0]) {
+                        resolve(result.docs);   
+                    } else {
+                        resolve({err: 'no existen documentos de tipo test'});
+                    }
+                });
+            })
+        }
+    }
+},
   {
     // agregar usuario al sistema
     method: "POST",
@@ -17,6 +47,8 @@ const Users = [
         let email = request.payload.email;
         let lastname = request.payload.lastname;
         let password = request.payload.password;
+        let userType = request.payload.userType;
+        let Mphone = request.payload.phone
         let newUserObj = {};
 
         return new Promise(resolve => {
@@ -41,10 +73,13 @@ const Users = [
               } else {
                 newUserObj._id = email;
                 newUserObj.type = "user";
+                newUserObj.DNI = dni;
                 newUserObj.status = "enabled";
                 newUserObj.name = name;
                 newUserObj.lastname = lastname;
                 newUserObj.password = md5(password);
+                newUserObj.userType = userType;
+                newUserObj.phone = Mphone;
 
                 db.insert(newUserObj, function(errUpdate, body) {
                   if (errUpdate) throw errUpdate;
@@ -64,13 +99,16 @@ const Users = [
           lastname: Joi.string(),
           dni: Joi.string(),
           email: Joi.string(),
-          password: Joi.string()
+          password: Joi.string(),
+          userType: Joi.string(),
+          phone: Joi.string()
+
         })
       }
     }
   },
   {
-    // agregar usuario al sistema
+    // eliminar usuario al sistema
     method: "DELETE",
     path: "/api/disableUser",
     options: {

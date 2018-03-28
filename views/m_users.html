@@ -8,19 +8,21 @@
 
 <div class="row">
 	<div class="col-md-4 col-sm-6 col-xs-12">
-		Rut:<input type="text" id="txtRut" class="form-control">
+        Email:<input type="text" id="txtEmail" class="form-control">
+        Contraseña:<input type="password" id="txtContraseña" class="form-control">
+        Rut:<input type="text" id="txtRut" class="form-control">
 		Nombres:<input type="text" id="txtNombres" class="form-control">
 		Apellidos:<input type="text" id="txtApellidos" class="form-control">
-		Usuario:<input type="text" id="txtUsuario" class="form-control">
-		Contraseña:<input type="text" id="txtContraseña" class="form-control">
+		
 
-		Tipo Usuario:<select id="txtTipoUsuario" class="form-control" >
-				<option value="Administrador">Administrador</option>
+		Tipo Usuario:<select id="cboTipoUsuario" class="form-control" >
+                <option value="">Seleccione cargo....</option>
+                <option value="Administrador">Administrador</option>
 				<option value="Secretaria">Secretaria</option>
 		</select>
 
 		Telefono:<input type="text" id="txtTelefono" class="form-control">
-		Email:<input type="text" id="txtEmail" class="form-control">
+		
 
 	</div>
 
@@ -32,49 +34,190 @@
     	<br>
     	<button type="button" id="btnModificar" value="Modificar" class="btn btn-warning fa fa-2x fa-pencil-square-o btn-block" onclick=Modificar_U() > Modificar</button>
     	<br>
-    	<button type="button" id="btnNuevo" value="Nuevo" class="btn btn-warning fa fa-2x fa-file-o btn-block" onclick=Nuevo_U() > Nuevo</button>
+    	<button type="button" id="btnNuevo" value="Nuevo" class="btn btn-warning fa fa-2x fa-file-o btn-block" > Nuevo</button>
    	</div>
    		
 </div>
 
+<h1 id="cabezera" class="fa fa-3x fa-users" aria-hidden="true">  Listado de usuarios en sistema </h1>
+<center><div id="loading" style= " z-index: 30001;"></div></center>
+<table id="GridUsers" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+            	<th style="display:none">id</th>
+            	<th style="display:none">rev</th>
+                <th>DNI</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Email</th>
+                <th>userType</th>
+            </tr>
+        </thead>
+
+        <tfoot>
+            <tr>
+            	<th style="display:none">id</th>
+            	<th style="display:none">rev</th>
+                <th>Nombres</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Email</th>
+                <th>userType</th>
+            </tr>
+        </tfoot>
+
+    </table>
+
 
 {{#extend "js"}}
 <script>
-    function saveUser() {
+    var jsonUsers = {};
+    var G_DNI= ""
+    $(document).ready(function () {
+        listUsers()
+    });
+
+
+    function saveUser(name, lastname, Email, DNI, userType, phone, pass) {
+        //console.log(phonex)
+
         ajax({
             url: '/api/createUser',
             type: 'POST',
             data: {
-                dni: '111111111',
-                name: 'juan',
-                lastname: 'correa',
-                email: 'jcorr014@gmail.com',
-                password: '1234'
+                dni: DNI,
+                name: name,
+                lastname: lastname,
+                email: Email,
+                password: pass,
+                userType: userType,
+                phone: phone
             }
         }).then(data=>{
             console.log(data)
         })
+        
     }
 
-    function disableUser() {
+    function disableUser(id) {
         ajax({
             url: '/api/disableUser',
             type: 'DELETE',
             data: {
-                email: 'jcorr014@gmail.com'
+                email: id
             }
         }).then(data=>{
             console.log(data);
         })
     }
 
+    function listUsers(){
+        ajax({
+            url: '/api/listUsers'
+        }).then(data=>{
+            jsonUsers = data
+            //console.log(jsonUsers)
+            datatable = $('#GridUsers').dataTable({
+	                "bAutoWidth" : false,
+	                "aaData" : data,
+		            "columns" : [ 
+		            		{"data" : "_id"}, 
+                            {"data" : "_rev"},
+                            {"data" : "DNI"}, 
+		                    {"data" : "name"}, 
+		                    {"data" : "lastname"}, 
+                            {"data" : "_id"},
+                            {"data": "userType"}
+		        	],
+	    			"columnDefs": [
+	            		{"targets": [ 0,1 ],
+	                 	"visible": false,
+	                 	"searchable": true},
+	        		],
+		    		"select":
+		    			{style: 'single'}
+            })
+            $('#GridUsers tbody').on('click', 'tr', function () {
+                clearUsers()
+                if ( $(this).hasClass('selected') ) {
+                    $(this).removeClass('selected');
+                }
+                else {
+                    datatable.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                }
+                        
+                
+                   // console.log($(this))
+                    G_DNI = $(this)[0].children[0].innerText
+                    //console.log(G_DNI)
+                    
+                    for (var i=0; i < jsonUsers.length; i++){
+                        if(jsonUsers[i]["DNI"]== G_DNI ){
+                            //console.log(jsonUsers[i]["name"])
+                            document.getElementById("txtContraseña").value = jsonUsers[i]["password"]
+                            document.getElementById("txtTelefono").value =  jsonUsers[i]["phone"]
+                        }
+                    }
+                    
+                    document.getElementById("txtRut").value = $(this)[0].children[0].innerText
+                    document.getElementById("txtNombres").value = $(this)[0].children[1].innerText
+                    document.getElementById("txtApellidos").value = $(this)[0].children[2].innerText
+                    document.getElementById("txtEmail").value = $(this)[0].children[3].innerText
+                    //console.log($(this)[0].children[4].innerText)
+                    $('#cboTipoUsuario').val($(this)[0].children[4].innerText).trigger('change');
+    		});
+        })
+    }
+    
+
+    function clearUsers(){
+        console.log("Campos limpiados")
+        document.getElementById("txtEmail").value = ""
+        document.getElementById("txtContraseña").value = ""
+        document.getElementById("txtRut").value = ""
+        document.getElementById("txtNombres").value = ""
+        document.getElementById("txtApellidos").value = ""
+        document.getElementById("cboTipoUsuario").value = ""
+        document.getElementById("txtTelefono").value = ""
+    }
+
     $('#btnGuardar').on('click', function(){
-        saveUser();
+        var name = document.getElementById("txtNombres").value
+        var lastname = document.getElementById("txtApellidos").value
+        var Email = document.getElementById("txtEmail").value 
+        var DNI = document.getElementById("txtRut").value
+        var pass = document.getElementById("txtContraseña").value
+        var userType = document.getElementById("cboTipoUsuario").value 
+        var phone = document.getElementById("txtTelefono").value 
+
+        //console.log(phone)
+        //console.log('------')
+        if(name == "" || lastname=="" || Email=="" || DNI=="" || pass=="" || userType=="" || phone=="" ){
+            alert("faltan campos por completar")
+        }else{
+            //console.log("todos los campos OK")
+            saveUser(name, lastname, Email, DNI, userType, phone, pass);
+        }
+       
     })
 
     $('#btnEliminar').on('click', function(){
-        disableUser();
+        var id = document.getElementById("txtEmail").value 
+        if(id!=""){
+            disableUser(id);
+        }else{
+            alert("seleccione el usuario que desea eliminar")
+            clearUsers()
+        }
+       
     })
+
+    $('#btnNuevo').on('click', function(){
+      clearUsers()
+    })
+
+
 </script>
 {{/extend}}
 

@@ -6,21 +6,25 @@ import configEnv from "../../config/env_status.js";
 let db = cloudant.db.use(configEnv.db);
 
 const Users = [
-  { // listar usuarios del sistema
-    method: 'GET',
+  { // listar usuarios del sistema activos
+    method: 'POST',
     path: '/api/listUsers',
     options: {
         description: 'GET test array',
         notes: 'Retorna listado de usuarios del sistema',
         tags: ['api'], // Hay que añadir esta linea para que se agregue a la documentación 
+        
         handler: async (request, h) => {
+           let status = request.payload.status;
+            
             return new Promise(resolve=>{
                 db.find({
                     'selector': {
                         '_id': {
                             '$gte': null
                         },
-                        'type': 'user'
+                        'type': 'user',
+                        'status': status
                     },
                     "fields": ["_id","_rev",'dni','status', "name", "lastname", "email","userType", "password", "phone"]
                 }, (err, result) => {
@@ -33,11 +37,16 @@ const Users = [
                     }
                 });
             })
+        },
+        validate: {
+          payload: Joi.object().keys({
+            status: Joi.string()
+          })
         }
     }
 },
-{
-    // agregar usuario al sistema
+{// agregar usuario al sistema
+    
     method: "POST",
     path: "/api/createUser",
     options: {
@@ -76,7 +85,7 @@ const Users = [
               } else {
                 newUserObj._id = email;
                 newUserObj.type = "user";
-                newUserObj.DNI = dni;
+                newUserObj.dni = dni;
                 newUserObj.status = "enabled";
                 newUserObj.name = name;
                 newUserObj.lastname = lastname;
@@ -88,7 +97,8 @@ const Users = [
                   if (errUpdate) throw errUpdate;
 
                   resolve({
-                    ok: "Cliente " + newUserObj._id + " agregado correctamente!"
+                   // ok: "Cliente " + newUserObj._id + " agregado correctamente!"
+                   body
                   });
                 });
               }
@@ -110,8 +120,8 @@ const Users = [
       }
     }
   },
-  {
-    // eliminar usuario al sistema
+  {// eliminar usuario al sistema
+    
     method: "DELETE",
     path: "/api/disableUser",
     options: {
@@ -158,8 +168,8 @@ const Users = [
       }
     }
 },
-{ 
-  //elimina de un usuario ////////////////////////
+{ //elimina de un usuario ////////////////////////
+  
       method: 'DELETE',
       path: '/api/deleteUser',
       config: {
@@ -187,7 +197,7 @@ const Users = [
       }
   },
   { 
-    //elimina de un usuario ////////////////////////
+    
         method: 'PUT',
         path: '/api/modUser',
         config: {

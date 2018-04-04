@@ -3,8 +3,8 @@
 {{#extend "css"}}
 {{/extend}}
 
-
-<h1 id="cabezera" class="fa fa-truck fa-3x" aria-hidden="true">  Mantenedor usuario </h1>
+<br>
+<h1 id="cabezera" class="fa fa-3x fa-user" aria-hidden="true">  Mantenedor usuario </h1>
 
 <div class="row">
 	<div class="col-md-4 col-sm-6 col-xs-12">
@@ -32,26 +32,39 @@
        
     <div class="col-md-4 col-sm-12 col-xs-12">
 		<br><br>
-			<button type="button" id="btnGuardar" value="Guardar" class="btn btn-success fa fa-2x fa-floppy-o btn-block"> Guardar</button>
+		<button type="button" id="btnGuardar" value="Guardar" class="btn btn-success fa fa-2x fa-floppy-o btn-block"> Guardar</button>
 		<br>
     	<button type="button" id="btnEliminar" value="Eliminar" class="btn btn-danger fa fa-2x fa-trash-o btn-block" > Eliminar</button>
     	<br>
     	<button type="button" id="btnModificar" value="Modificar" class="btn btn-warning fa fa-2x fa-pencil-square-o btn-block" () > Modificar</button>
     	<br>
     	<button type="button" id="btnNuevo" value="Nuevo" class="btn btn-warning fa fa-2x fa-file-o btn-block" > Nuevo</button>
-   	</div>
+   	
+
+            <br><br><br>
+             <fieldset>
+                    <label for="radActive">Activos</label>
+                    <input class="radio" type="radio" name="radio-1" id="radActive">
+
+                    <label for="radInactive">Inactivos</label>
+                    <input class="radio" type="radio" name="radio-1" id="radInactive">
+
+             </fieldset>
+             
+            
+    </div>
    		
 </div>
 
 <h1 id="cabezera" class="fa fa-3x fa-users" aria-hidden="true">  Listado de usuarios en sistema </h1>
 <center><div id="loading" style= " z-index: 30001;"></div></center>
 <div class="table-responsive">
-<table id="GridUsers" class="display" cellspacing="0" width="100%">
+<table id="gridUsers" class="display" cellspacing="0" width="100%">
         <thead>
             <tr>
-            	<th style="display:none">id</th>
-            	<th style="display:none">rev</th>
-                <th>DNI</th>
+            	<th>id</th>
+            	<th>rev</th>
+                <th>dni</th>
                 <th>Nombres</th>
                 <th>Apellidos</th>
                 <th>Email</th>
@@ -61,9 +74,9 @@
 
         <tfoot>
             <tr>
-            	<th style="display:none">id</th>
-            	<th style="display:none">rev</th>
-                <th>Nombres</th>
+            	<th>id</th>
+            	<th>rev</th>
+                <th>dni</th>
                 <th>Nombres</th>
                 <th>Apellidos</th>
                 <th>Email</th>
@@ -75,51 +88,62 @@
 </div>
 
 {{#extend "js"}}
+<script src="https://use.fontawesome.com/d8df9311bf.js"></script>
 <script>
     var jsonUsers = {};
     var G_DNI= ""
+    var datatable;
+
     $(document).ready(function () {
+        $('#radActive').prop('checked',true)
         listUsers()
     });
 
 
-    function saveUser() {
-        var name = document.getElementById("txtNombres").value
-        var lastname = document.getElementById("txtApellidos").value
-        var Email = document.getElementById("txtEmail").value 
-        var DNI = document.getElementById("txtRut").value //  var dni = $('#txtRut').val();
-        var pass = document.getElementById("txtContraseña").value
-        var userType = document.getElementById("cboTipoUsuario").value 
-        var phone = document.getElementById("txtTelefono").value 
+function saveUser() {
+    var name = document.getElementById("txtNombres").value
+    var lastname = document.getElementById("txtApellidos").value
+    var Email = document.getElementById("txtEmail").value 
+    var dni = document.getElementById("txtRut").value //  var dni = $('#txtRut').val();
+    var pass = document.getElementById("txtContraseña").value
+    var userType = document.getElementById("cboTipoUsuario").value 
+    var phone = document.getElementById("txtTelefono").value 
 
-       
-
-        //console.log(phone)
-        //console.log('------')
-        if(name == "" || lastname=="" || Email=="" || DNI=="" || pass=="" || userType=="" || phone=="" ){
-            alert("faltan campos por completar")
-        }else{
-            //console.log("todos los campos OK")
-             ajax({
-                url: '/api/createUser',
-                type: 'POST',
-                data: {
-                    dni: DNI,
-                    name: name,
-                    lastname: lastname,
-                    email: Email,
-                    password: pass,
-                    userType: userType,
-                    phone: phone
-                }
-            }).then(data=>{
-                console.log(data)
-            })
-        }
-
+    if(name == "" || lastname=="" || Email=="" || dni=="" || pass=="" || userType=="" || phone=="" ){
+        alert("faltan campos por completar")
+    }else{
+        //console.log("todos los campos OK")
+         ajax({
+            url: '/api/createUser',
+            type: 'POST',
+            data: {
+                dni: dni,
+                name: name,
+                lastname: lastname,
+                email: Email,
+                password: pass,
+                userType: userType,
+                phone: phone
+            }
+        }).then(data=>{
+            var table = $('#gridUsers').DataTable();
+            table.row.add( {
+                "_id": data.body.id,
+                "_rev": data.body.rev,
+                "dni": dni, 
+                "name": name, 
+                "lastname": lastname, 
+                "_id": data.body.id,
+                "userType": userType
+            } ).draw();
+            
+        })
+    }
+    console.log("Usuario Creado Correctamente")
+    clearUsers()
        
         
-    }
+}
 
     function disableUser(id) {
         ajax({
@@ -130,17 +154,30 @@
             }
         }).then(data=>{
             console.log(data);
+            var table = $('#gridUsers').DataTable();
+            table.row('.selected').remove().draw( false );
         })
     }
 
     function listUsers(){
+        var status = ""
+        var checkboxes = $( ".radio" ).checkboxradio();
+        if(checkboxes[0]["checked"]==true){ //0 Activos || 1 Inactivos
+            status = "enabled"
+        }else{
+            status = "disabled"
+        }
+
+
         ajax({
-            url: '/api/listUsers'
+            url: '/api/listUsers',
+            type: 'POST',
+             data: {
+                'status': status
+            }
         }).then(data=>{
             jsonUsers = data
-            console.log(jsonUsers)
-            //console.log(jsonUsers)
-            datatable = $('#GridUsers').dataTable({
+            var datatable = $('#gridUsers').dataTable({
                     "bAutoWidth" : false,
                     "responsive": true,
 	                "aaData" : data,
@@ -161,7 +198,7 @@
 		    		"select":
 		    			{style: 'single'}
             })
-            $('#GridUsers tbody').on('click', 'tr', function () {
+            $('#gridUsers tbody').on('click', 'tr', function () {
                 clearUsers()
                 if ( $(this).hasClass('selected') ) {
                     $(this).removeClass('selected');
@@ -194,63 +231,6 @@
         })
     }
     
-
-    function clearUsers(){
-        console.log("Campos limpiados")
-        document.getElementById("txtEmail").value = ""
-        document.getElementById("txtContraseña").value = ""
-        document.getElementById("txtRut").value = ""
-        document.getElementById("txtNombres").value = ""
-        document.getElementById("txtApellidos").value = ""
-        document.getElementById("cboTipoUsuario").value = ""
-        document.getElementById("txtTelefono").value = ""
-    }
-
-    function DeleteUser(id, rev){
-            $.ajax({
-                url: '/api/deleteUser',
-                type: 'DELETE',
-                data: {id, rev},
-                beforeSend: function(){
-                    //$('#loading').append('<img src="/public/images/loading3.gif" height=200 width=250>');
-                }
-            })
-            .done(function(data) {
-               console.log(data)
-                //table.row('.selected').remove().draw( false );
-                console.log("se elimino")
-                    //////creacion del log
-               // createLog("delete","se elimino usuario " + id, "User")
-
-            })
-            .fail(function() {
-                console.log("error al eliminar usuario =S");
-            });
-    }
-
-    $('#btnGuardar').on('click', function(){
-            saveUser();
-    })
-
-    $('#btnEliminar').on('click', function(){
-        var id = document.getElementById("txtEmail").value 
-        if(id!=""){
-            disableUser(id);
-        }else{
-            alert("seleccione el usuario que desea eliminar")
-            clearUsers()
-        }
-       
-    })
-
-    $('#btnNuevo').on('click', function(){
-      clearUsers()
-    })
-
-    $('#btnModificar').on('click', function(){
-       modUser();
-    })
-
     function modUser() {
         var name = $('#txtNombres').val();
         var lastname = $('#txtApellidos').val();
@@ -279,6 +259,87 @@
         });
         
     }
+    function clearUsers(){
+        console.log("Campos limpiados")
+        document.getElementById("txtEmail").value = ""
+        document.getElementById("txtContraseña").value = ""
+        document.getElementById("txtRut").value = ""
+        document.getElementById("txtNombres").value = ""
+        document.getElementById("txtApellidos").value = ""
+        document.getElementById("cboTipoUsuario").value = ""
+        document.getElementById("txtTelefono").value = ""
+    }
+
+    function DeleteUser(id, rev){
+            
+            $.ajax({
+                url: '/api/deleteUser',
+                type: 'DELETE',
+                data: {id, rev},
+                beforeSend: function(){
+                    //$('#loading').append('<img src="/public/images/loading3.gif" height=200 width=250>');
+                }
+            })
+            .done(function(data) {
+               console.log(data)
+                //table.row('.selected').remove().draw( false );
+                console.log("se elimino")
+                var table = $('#gridUsers').DataTable();
+                table.row('.selected').remove().draw( false );
+
+                    //////creacion del log
+               // createLog("delete","se elimino usuario " + id, "User")
+
+            })
+            .fail(function() {
+                console.log("error al eliminar usuario =S");
+            });
+    }
+
+    
+
+
+
+$('#btnGuardar').on('click', function(){
+            saveUser();
+})
+
+$('#btnEliminar').on('click', function(){
+    var id = document.getElementById("txtEmail").value 
+    if(id!=""){
+        disableUser(id);
+        clearUsers()
+    }else{
+        alert("seleccione el usuario que desea eliminar")
+        clearUsers()
+    }
+   
+})
+
+$('#btnNuevo').on('click', function(){
+      clearUsers()
+})
+
+$('#btnModificar').on('click', function(){
+       modUser();
+})
+
+$('#radActive').on("click", function(){
+    
+    //console.log("paso activado")
+    listUsers()
+    
+});
+
+$('#radInactive').on("click", function(){
+    
+    //console.log("paso inactivado =S")
+    listUsers()
+    
+});
+
+
+    
 
 
 </script>

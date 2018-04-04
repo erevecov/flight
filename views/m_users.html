@@ -28,9 +28,9 @@
 
 	<div class="col-md-2 col-sm-12 col-xs-12">
 
-       </div>
+    </div>
        
-       <div class="col-md-4 col-sm-12 col-xs-12">
+    <div class="col-md-4 col-sm-12 col-xs-12">
 		<br><br>
 			<button type="button" id="btnGuardar" value="Guardar" class="btn btn-success fa fa-2x fa-floppy-o btn-block"> Guardar</button>
 		<br>
@@ -45,6 +45,7 @@
 
 <h1 id="cabezera" class="fa fa-3x fa-users" aria-hidden="true">  Listado de usuarios en sistema </h1>
 <center><div id="loading" style= " z-index: 30001;"></div></center>
+<div class="table-responsive">
 <table id="GridUsers" class="display" cellspacing="0" width="100%">
         <thead>
             <tr>
@@ -71,7 +72,7 @@
         </tfoot>
 
     </table>
-
+</div>
 
 {{#extend "js"}}
 <script>
@@ -86,10 +87,12 @@
         var name = document.getElementById("txtNombres").value
         var lastname = document.getElementById("txtApellidos").value
         var Email = document.getElementById("txtEmail").value 
-        var DNI = document.getElementById("txtRut").value
+        var DNI = document.getElementById("txtRut").value //  var dni = $('#txtRut').val();
         var pass = document.getElementById("txtContraseña").value
         var userType = document.getElementById("cboTipoUsuario").value 
         var phone = document.getElementById("txtTelefono").value 
+
+       
 
         //console.log(phone)
         //console.log('------')
@@ -135,14 +138,16 @@
             url: '/api/listUsers'
         }).then(data=>{
             jsonUsers = data
+            console.log(jsonUsers)
             //console.log(jsonUsers)
             datatable = $('#GridUsers').dataTable({
-	                "bAutoWidth" : false,
+                    "bAutoWidth" : false,
+                    "responsive": true,
 	                "aaData" : data,
 		            "columns" : [ 
 		            		{"data" : "_id"}, 
                             {"data" : "_rev"},
-                            {"data" : "DNI"}, 
+                            {"data" : "dni"}, 
 		                    {"data" : "name"}, 
 		                    {"data" : "lastname"}, 
                             {"data" : "_id"},
@@ -172,7 +177,7 @@
                     //console.log(G_DNI)
                     
                     for (var i=0; i < jsonUsers.length; i++){
-                        if(jsonUsers[i]["DNI"]== G_DNI ){
+                        if(jsonUsers[i]["dni"]== G_DNI ){
                             //console.log(jsonUsers[i]["name"])
                             document.getElementById("txtContraseña").value = jsonUsers[i]["password"]
                             document.getElementById("txtTelefono").value =  jsonUsers[i]["phone"]
@@ -210,8 +215,8 @@
                     //$('#loading').append('<img src="/public/images/loading3.gif" height=200 width=250>');
                 }
             })
-            .done(function() {
-               // console.log(data)
+            .done(function(data) {
+               console.log(data)
                 //table.row('.selected').remove().draw( false );
                 console.log("se elimino")
                     //////creacion del log
@@ -243,20 +248,37 @@
     })
 
     $('#btnModificar').on('click', function(){
-       // modifyUser
-       var Email = document.getElementById("txtEmail").value
-       var Rev = ""
-       console.log(jsonUsers) 
-       //
-       for(var i in jsonUsers){
-            if (Email==jsonUsers[i]["_id"]){
-                Rev = jsonUsers[i]["_rev"]
-            }
-       }
-       DeleteUser(Email, Rev)
-       saveUser()
-
+       modUser();
     })
+
+    function modUser() {
+        var name = $('#txtNombres').val();
+        var lastname = $('#txtApellidos').val();
+        var email = $('#txtEmail').val();
+        var dni = $('#txtRut').val();
+        var userType = $('#cboTipoUsuario').val();
+        var phone = $('#txtTelefono').val();
+
+        console.log(name, lastname, email, dni, userType, phone)
+        ajax({
+            url: 'api/modUser',
+            type: 'PUT',
+            data: {
+                email,
+                name,
+                lastname,
+                dni,
+                userType,
+                phone
+            }
+        }).then(data=>{
+            console.log(data);
+            if(data.ok) {
+                listUsers();
+            }
+        });
+        
+    }
 
 
 </script>

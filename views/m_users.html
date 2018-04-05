@@ -92,7 +92,7 @@
 <script>
     var jsonUsers = {};
     var G_DNI= ""
-    var datatable;
+    var datatable ;
 
     $(document).ready(function () {
         $('#radActive').prop('checked',true)
@@ -146,6 +146,7 @@ function saveUser() {
 }
 
     function disableUser(id) {
+       
         ajax({
             url: '/api/disableUser',
             type: 'DELETE',
@@ -154,8 +155,23 @@ function saveUser() {
             }
         }).then(data=>{
             console.log(data);
-            var table = $('#gridUsers').DataTable();
-            table.row('.selected').remove().draw( false );
+            listUsers()
+            
+        })
+    }
+
+    function enabledUser(id) {
+       
+        ajax({
+            url: '/api/enabledUser',
+            type: 'DELETE',
+            data: {
+                email: id
+            }
+        }).then(data=>{
+            console.log(data);
+            listUsers()
+            
         })
     }
 
@@ -167,8 +183,10 @@ function saveUser() {
         }else{
             status = "disabled"
         }
-
-
+       
+      //limpio la tabla
+      $('#gridUsers').dataTable().fnDestroy();
+        
         ajax({
             url: '/api/listUsers',
             type: 'POST',
@@ -177,7 +195,7 @@ function saveUser() {
             }
         }).then(data=>{
             jsonUsers = data
-            var datatable = $('#gridUsers').dataTable({
+            datatable = $('#gridUsers').dataTable({
                     "bAutoWidth" : false,
                     "responsive": true,
 	                "aaData" : data,
@@ -268,6 +286,7 @@ function saveUser() {
         document.getElementById("txtApellidos").value = ""
         document.getElementById("cboTipoUsuario").value = ""
         document.getElementById("txtTelefono").value = ""
+        $('#txtEmail').focus();
     }
 
     function DeleteUser(id, rev){
@@ -307,7 +326,12 @@ $('#btnGuardar').on('click', function(){
 $('#btnEliminar').on('click', function(){
     var id = document.getElementById("txtEmail").value 
     if(id!=""){
-        disableUser(id);
+        var checkboxes = $( ".radio" ).checkboxradio();
+        if(checkboxes[0]["checked"]==true){ //0 Activos || 1 Inactivos
+            disableUser(id);
+        }else{
+            enabledUser(id)
+        }
         clearUsers()
     }else{
         alert("seleccione el usuario que desea eliminar")

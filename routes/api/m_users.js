@@ -196,6 +196,55 @@ const Users = [
           }
       }
   },
+  {// eliminar usuario al sistema
+    
+    method: "DELETE",
+    path: "/api/enabledUser",
+    options: {
+      handler: (request, h) => {
+        let email = request.payload.email;
+
+        return new Promise(resolve => {
+          db.find(
+            {
+              selector: {
+                _id: email,
+                type: "user",
+                status: "disabled"
+              },
+              limit: 1
+            },
+            (err, result) => {
+              if (err) throw err;
+
+              if (!result.docs[0]) {
+                resolve({
+                  error: `El usuario ${email} no existe o ya está habilitado.`
+                });
+              } else {
+                let client = result.docs[0];
+
+                client.status = "enabled";
+                db.insert(client, function(errUpdate, body) {
+                  if (errUpdate) throw errUpdate;
+
+                  resolve({
+                    ok: `El Cliente ${client._id} habilitado correctamente!`
+                  });
+                });
+              }
+            }
+          );
+        });
+      },
+      validate: {
+        payload: Joi.object().keys({
+          email: Joi.string()
+        })
+      }
+    }
+}
+  ,
   { 
     
         method: 'PUT',

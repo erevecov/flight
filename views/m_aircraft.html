@@ -1,0 +1,232 @@
+ {{!< layout/default}}
+
+{{#extend "css"}}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<link href="/public/css/datepicker.min.css" rel="stylesheet" type="text/css">
+<link href="/public/JQui/jquery-ui.css" rel="stylesheet" type="text/css">
+
+{{/extend}}
+
+<br>
+<h1 id="cabezera" class="fa fa-truck fa-3x" aria-hidden="true">  Mantenedor Aeronave </h1>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<div class="row">
+	<div class="col-md-4 col-sm-12 col-xs-12">
+		
+
+		<p>Matricula: <input type="text" id="txtEnrollment" class="form-control"></p>
+		Tipo Aeronave:<select id="cboTypeAircraft" class="js-example-basic-single"></select>
+		Certificado Aeronave:<select id="cboAircraftCertificate" class="js-example-basic-single"></select>
+		<input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+		<div id="slider-range-min"></div>
+		
+
+		<br><br>
+		<form enctype="multipart/form-data">
+		    <!-- <input name="file" type="file" /> -->
+		    <input type="button" value="Certificado Aeronabilidad (PDF)" />
+		</form>
+		<progress></progress>
+		<br><br>
+		
+
+		N Serie: <input type="text" id="txtSerialNumber" class="form-control">
+		<p>Fecha vencimiento Certificado estandar: <div id="dateExpireCAircraft"></div></p>
+		
+		
+
+		
+		<!--
+		<label for="checkbox-1">Estela Turbolenta</label>
+    	<input type="checkbox" name="checkbox-1" id="checkbox-1">
+    	-->	
+
+
+             <label for="checkbox-1">Estela Turbolenta</label>
+    		<input type="checkbox" name="checkbox-1" id="checkEstela">
+   	 	
+
+    	<br>
+
+    	Equipo TeleEmergencia:<select id="cboTelemergencyEquipment" class="js-example-basic-single"></select>
+
+		<br><br>
+		<form enctype="multipart/form-data">
+		    <!-- <input name="file" type="file" /> -->
+		    <input type="button" value="Imagen del avion" />
+		</form>
+		<progress></progress>
+		<br><br>
+		
+		
+		<!--
+		<div id="slider">
+		  Cantidad horas Voladas:<div id="custom-handle" class="ui-slider-handle"></div>
+		</div>
+		-->
+
+
+	</div>
+	
+	<div class="col-md-4 col-sm-12 col-xs-12">
+		<br><br>
+		<button type="button" id="btnSave" value="Guardar" class="btn btn-success fa fa-2x fa-floppy-o btn-block" > Guardar</button>
+		<br>
+    	<button type="button" id="btnEliminar" value="Eliminar" class="btn btn-danger fa fa-2x fa-trash-o btn-block"> Eliminar</button>
+    	<br>
+    	<button type="button" id="btnModificar" value="Modificar" class="btn btn-warning fa fa-2x fa-pencil-square-o btn-block"> Modificar</button>
+    	<br>
+    	<button type="button" id="btnNuevo" value="Nuevo" class="btn btn-warning fa fa-2x fa-file-o btn-block"> Nuevo</button>
+   	</div>
+   		<div class="col-md-2">
+
+   	</div>
+</div>
+
+{{#extend "js"}}
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://use.fontawesome.com/d8df9311bf.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+<script src="/public/js/datepicker.min.js"></script>
+<script src="/public/JQui/jquery-ui.js"></script>
+
+<script>
+
+var arrTypeAircraft ;
+var arrCertificateAircraft ;
+var arrTelemergencyEquipment;
+
+$(document).ready(function () {  
+	
+	$('#radEstela').prop('checked',true)
+	//slider para el peso max
+	$( "#slider-range-min" ).slider({
+      range: "min",
+      value: 200,
+      min: 10,
+      max: 9999,
+      slide: function( event, ui ) {
+        $( "#amount" ).val( ui.value + 'kg max despegue');
+      }
+    });
+
+	//fechas
+	$("#dateExpireCAircraft").datepicker();
+	$("#dateExpireCAircraft" ).datepicker( "option", "dateFormat", 'dd/mm/yy' );
+	//comboboxes
+    $('#cboTypeAircraft').select2();
+    $('#cboAircraftCertificate').select2();
+    $('#cboTelemergencyEquipment').select2();
+
+   	aircraftType()
+    certificateAircraft()
+    TelemergencyEquipment()
+
+});
+
+//retorna los certificados en db
+function certificateAircraft(){
+	
+	ajax({
+        url: '/api/aircraftCertificate'
+    }).then(data=>{
+    	arrCertificateAircraft=data[0]["certificate"]
+		console.log(arrCertificateAircraft)
+		$("#cboAircraftCertificate").select2({
+			data: arrCertificateAircraft
+		});
+	})
+}
+//retorna los tipos de aeronaves
+function aircraftType(){
+   
+   ajax({
+        url: '/api/aircraftType'
+    }).then(data=>{
+    	arrTypeAircraft=data[0]["aircraft"]
+    	console.log(arrTypeAircraft)
+		$("#cboTypeAircraft").select2({
+			data: arrTypeAircraft
+		});
+	})
+}
+//retorna los equipos de teleemergencia
+function TelemergencyEquipment(){
+	
+   ajax({
+        url: '/api/TelemergencyEquipment'
+    }).then(data=>{
+    	arrTelemergencyEquipment=data[0]["equipment"]
+    	console.log(arrTelemergencyEquipment)
+		$("#cboTelemergencyEquipment").select2({
+			data: arrTelemergencyEquipment
+		});
+	})
+}
+
+function saveAircraft() {
+    var enrollment = $('#txtEnrollment').val();
+    var typeAircraft = $('#cboTypeAircraft').val();
+    var aircraftCertificate = $('#cboAircraftCertificate').val();
+   	var maxTakeoff = parseInt($( "#amount" ).val());
+    var serialNumber = $('#txtSerialNumber').val();
+    var standardCertificate = $('#txtNSerie').val();
+    var dateExpireCAircraft = $('#dateExpireCAircraft').val();
+    var estelaTurbolenta = $("#checkEstela").is(':checked');
+	var TelemergencyEquipment = $('#cboTelemergencyEquipment').val()
+
+
+    //console.log(estelaTurbolenta)
+   
+   ajax({
+            url: '/api/createAircraft',
+            type: 'POST',
+            data: {
+                enrollment: enrollment,
+                typeAircraft: typeAircraft,
+                aircraftCertificate: aircraftCertificate,
+                maxTakeoff: maxTakeoff,
+                serialNumber: serialNumber,
+                standardCertificate: standardCertificate,
+                dateExpireCAircraft: dateExpireCAircraft,
+                estelaTurbolenta: estelaTurbolenta,
+                TelemergencyEquipment: TelemergencyEquipment
+            }
+        }).then(data=>{
+            //console.log(data["error"])
+            if (data["error"]== "ya existe."){
+                swal("Error...", "la aeronave ya existe", "warning");
+            }else{
+            /*var table = $('#gridUsers').DataTable();
+            table.row.add( {
+                "_id": data.body.id,
+                "_rev": data.body.rev,
+                "dni": dni, 
+                "name": name, 
+                "lastname": lastname, 
+                "_id": data.body.id,
+                "userType": userType
+            } ).draw();
+            */
+            swal("Usuario creado", "usuario registrado correctamente", "success");
+            }
+           
+            
+        })
+    
+       
+        
+}
+
+
+
+$('#btnSave').on('click', function(){
+      saveAircraft()
+})
+
+
+</script>
+{{/extend}}
+
+
+

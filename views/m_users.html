@@ -10,7 +10,7 @@
 	<div class="col-md-4 col-sm-6 col-xs-12">
         Email:<input type="text" id="txtEmail" class="form-control">
         Contraseña:<input type="password" id="txtContraseña" class="form-control">
-        Rut:<input type="text" id="txtRut" class="form-control">
+        RUN:<input type="text" id="txtRut" class="form-control">
 		Nombres:<input type="text" id="txtNombres" class="form-control">
 		Apellidos:<input type="text" id="txtApellidos" class="form-control">
 		
@@ -21,7 +21,7 @@
 				<option value="Secretaria">Secretaria</option>
 		</select>
 
-		Telefono:<input type="text" id="txtTelefono" class="form-control">
+		Telefono: <input type="text" id="txtTelefono" value="+569" class="form-control">
 		
 
 	</div>
@@ -36,7 +36,12 @@
 		<br>
     	<button type="button" id="btnEliminar" value="Eliminar" class="btn btn-danger fa fa-2x fa-trash-o btn-block" > Eliminar</button>
     	<br>
-    	<button type="button" id="btnModificar" value="Modificar" class="btn btn-warning fa fa-2x fa-pencil-square-o btn-block" () > Modificar</button>
+
+        <button type="button" id="btnModificar" value="Modificar" class="btn btn-warning fa fa-2x fa-pencil-square-o btn-block" () > Modificar</button>
+
+    	
+
+
     	<br>
     	<button type="button" id="btnNuevo" value="Nuevo" class="btn btn-warning fa fa-2x fa-file-o btn-block" > Nuevo</button>
    	
@@ -55,7 +60,7 @@
     </div>
    		
 </div>
-
+<br><br>
 <h1 id="cabezera" class="fa fa-3x fa-users" aria-hidden="true">  Listado de usuarios en sistema </h1>
 <center><div id="loading" style= " z-index: 30001;"></div></center>
 <div class="table-responsive">
@@ -88,15 +93,19 @@
 </div>
 
 {{#extend "js"}}
-<script src="https://use.fontawesome.com/d8df9311bf.js"></script>
+<!--<script src="https://use.fontawesome.com/d8df9311bf.js"></script> -->
+<!--<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
 <script>
+
     var jsonUsers = {};
     var G_DNI= ""
     var datatable ;
 
     $(document).ready(function () {
+        $('#btnModificar').hide()
         $('#radActive').prop('checked',true)
         listUsers()
+
     });
 
 
@@ -126,6 +135,10 @@ function saveUser() {
                 phone: phone
             }
         }).then(data=>{
+            //console.log(data["error"])
+            if (data["error"]== "ya existe."){
+                swal("Error...", "el usuario ya existe", "warning");
+            }else{
             var table = $('#gridUsers').DataTable();
             table.row.add( {
                 "_id": data.body.id,
@@ -136,32 +149,61 @@ function saveUser() {
                 "_id": data.body.id,
                 "userType": userType
             } ).draw();
+            swal("Usuario creado", "usuario registrado correctamente", "success");
+            }
+           
             
         })
     }
-    console.log("Usuario Creado Correctamente")
+    
     clearUsers()
        
         
 }
 
-    function disableUser(id) {
+function disableUser(id) {
        
-        ajax({
-            url: '/api/disableUser',
-            type: 'DELETE',
-            data: {
-                email: id
-            }
-        }).then(data=>{
-            console.log(data);
-            listUsers()
-            
-        })
-    }
+    swal({
+      title: "¿Seguro de Desabilitar usuario?",
+      text: "Esto impidira el acceso del usuario",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+                ajax({
+                url: '/api/disableUser',
+                type: 'DELETE',
+                data: {
+                    email: id
+                }
+            }).then(data=>{
+                console.log(data);
+                listUsers()
+                
+            })
+        swal("Usuario desabilitado", {
+          icon: "success",
+        });
+      } else {
+        swal("accion cancelada");
+      }
+    });
+}
+    
 
-    function enabledUser(id) {
-       
+
+function enabledUser(id) {
+    swal({
+      title: "¿Seguro de habilitar usuario?",
+      text: "Esto activara el acceso del usuario",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
         ajax({
             url: '/api/enabledUser',
             type: 'DELETE',
@@ -171,9 +213,15 @@ function saveUser() {
         }).then(data=>{
             console.log(data);
             listUsers()
-            
         })
-    }
+        swal("Usuario habilitado", {
+            icon: "success",
+        });
+      } else {
+        swal("accion cancelada");
+      }
+    });
+}
 
     function listUsers(){
         var status = ""
@@ -218,6 +266,9 @@ function saveUser() {
             })
             $('#gridUsers tbody').on('click', 'tr', function () {
                 clearUsers()
+                $('#btnGuardar').hide()
+                $('#btnModificar').show()
+
                 if ( $(this).hasClass('selected') ) {
                     $(this).removeClass('selected');
                 }
@@ -273,6 +324,7 @@ function saveUser() {
             console.log(data);
             if(data.ok) {
                 listUsers();
+                 swal("", "Usuario Modificado", "success");
             }
         });
         
@@ -285,7 +337,7 @@ function saveUser() {
         document.getElementById("txtNombres").value = ""
         document.getElementById("txtApellidos").value = ""
         document.getElementById("cboTipoUsuario").value = ""
-        document.getElementById("txtTelefono").value = ""
+        document.getElementById("txtTelefono").value = "+569"
         $('#txtEmail').focus();
     }
 
@@ -321,6 +373,7 @@ function saveUser() {
 
 $('#btnGuardar').on('click', function(){
             saveUser();
+            clearUsers();
 })
 
 $('#btnEliminar').on('click', function(){
@@ -342,16 +395,27 @@ $('#btnEliminar').on('click', function(){
 
 $('#btnNuevo').on('click', function(){
       clearUsers()
+      $('#btnGuardar').show()
+      $('#btnModificar').hide()
 })
 
 $('#btnModificar').on('click', function(){
-       modUser();
+    modUser();
+   
 })
+
+
 
 $('#radActive').on("click", function(){
     
     //console.log("paso activado")
+    
     listUsers()
+    
+    $("#btnEliminar").html('Eliminar')
+    $('#btnGuardar').show()
+    $('#btnModificar').show()
+    $('#btnNuevo').show()
     
 });
 
@@ -359,6 +423,11 @@ $('#radInactive').on("click", function(){
     
     //console.log("paso inactivado =S")
     listUsers()
+    
+    $("#btnEliminar").html('Activar')
+    $('#btnGuardar').hide()
+    $('#btnModificar').hide()
+    $('#btnNuevo').hide()
     
 });
 

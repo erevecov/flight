@@ -4,9 +4,11 @@ import logoutHandler from './handlers/logoutHandler';
 import Home from './home';
 import Admin from './admin';
 import mUsers from './m_users'; // Mantenedor usuarios
+import mAirCraft from './m_aircraft'; //mantenedor Aircraft
 
 import APITest from './api/test';
 import APIMUsers from './api/m_users';
+import APIMAircraft from './api/m_aircraft';
 
 const Login = {
   method: ['GET', 'POST'],
@@ -48,8 +50,10 @@ const Routes = [].concat(
     Home,
     Admin,
     mUsers,
+    mAirCraft,
     APITest,
-    APIMUsers
+    APIMUsers,
+    APIMAircraft
 );
 
 export default Routes;

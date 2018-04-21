@@ -102,7 +102,7 @@
                         </div>
                         <br>
                         {{/if}}
-                        <input type="submit" class="btn btn-primary btn-block" value="Iniciar sesión">
+                        <input type="submit" class="btn btn-primary btn-block" value="Iniciar sesión" id="btnSubmit">
                         <br>
                         <br>
                         <br>
@@ -131,16 +131,25 @@
 
 <!--<script src="/public/js/default.js"></script>-->
 <script>
-
+//var userOnline = "login";
 $(document).ready(function() {
     $('#email').focus();
     var vid = document.getElementById("video-background");
     vid.playbackRate = 0.8;
+
 });
 
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
+    
 }
+
+
+$('#btnSubmit').on('click', function(){
+     userOnline = "vamos jotah";//$('#email').val()
+     console.log("del login " + userOnline);
+})
+
 
 </script>
 </body>

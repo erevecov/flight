@@ -8,30 +8,29 @@
 {{/extend}}
 
 <br>
-<h1 id="cabezera" class="fa fa-truck fa-3x" aria-hidden="true">  Mantenedor Aeronave </h1>
+<h1 id="cabezera" class="fas fa-fighter-jet" aria-hidden="true">  Mantenedor Aeronave </h1>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <div class="row">
 	<div class="col-md-4 col-sm-12 col-xs-12">
 		
 
 		<p>Matricula: <input type="text" id="txtEnrollment" class="form-control"></p>
-		Tipo Aeronave:<select id="cboTypeAircraft" class="js-example-basic-single"></select>
-		Certificado Aeronave:<select id="cboAircraftCertificate" class="js-example-basic-single"></select>
+		Tipo Aeronave:<select id="cboTypeAircraft" class="js-example-basic-single" style='width:100%'></select>
+		Certificado Aeronave:<select id="cboAircraftCertificate" class="js-example-basic-single" style='width:100%'></select>
 		<input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
 		<div id="slider-range-min"></div>
 		
 
 		<br><br>
-		<form enctype="multipart/form-data">
-		    <!-- <input name="file" type="file" /> -->
-		    <input type="button" value="Certificado Aeronabilidad (PDF)" />
-		</form>
-		<progress></progress>
+		
+		    <input type="button" value="Certificado Aeronabilidad (PDF)" style='width:100%' />
+		
+		
 		<br><br>
 		
 
 		N Serie: <input type="text" id="txtSerialNumber" class="form-control">
-		<p>Fecha vencimiento Certificado estandar: <div id="dateExpireCAircraft"></div></p>
+		<p>Fecha vencimiento Certificado estandar: <div id="dateExpireCAircraft" align="center"></div></p>
 		
 		
 
@@ -42,21 +41,21 @@
     	-->	
 
 
-             <label for="checkbox-1">Estela Turbolenta</label>
-    		<input type="checkbox" name="checkbox-1" id="checkEstela">
+             <label for="checkbox-1" >Estela Turbolenta</label>
+    		<input type="checkbox" name="checkbox-1" id="checkEstela" >
    	 	
 
     	<br>
 
-    	Equipo TeleEmergencia:<select id="cboTelemergencyEquipment" class="js-example-basic-single"></select>
+    	Equipo TeleEmergencia:<select id="cboTelemergencyEquipment" class="js-example-basic-single" style='width:100%'></select>
 
 		<br><br>
-		<form enctype="multipart/form-data">
-		    <!-- <input name="file" type="file" /> -->
-		    <input type="button" value="Imagen del avion" />
-		</form>
-		<progress></progress>
-		<br><br>
+		
+
+
+			    <input type="button" value="Imagen del avion (*.JPG)" style='width:100%' />
+
+		
 		
 		
 		<!--
@@ -98,6 +97,8 @@ var arrTelemergencyEquipment;
 
 $(document).ready(function () {  
 	
+	console.log(userOnline);
+	//console.log(vid)
 	$('#radEstela').prop('checked',true)
 	//slider para el peso max
 	$( "#slider-range-min" ).slider({
@@ -109,6 +110,7 @@ $(document).ready(function () {
         $( "#amount" ).val( ui.value + 'kg max despegue');
       }
     });
+	$( "#amount" ).val( $( "#slider-range-min" ).slider( "value" ) + 'kg max despegue' );
 
 	//fechas
 	$("#dateExpireCAircraft").datepicker();
@@ -174,7 +176,7 @@ function saveAircraft() {
     var dateExpireCAircraft = $('#dateExpireCAircraft').val();
     var estelaTurbolenta = $("#checkEstela").is(':checked');
 	var TelemergencyEquipment = $('#cboTelemergencyEquipment').val()
-
+	var UserOwner = "jotapeh" //que sea el objeto completo
 
     //console.log(estelaTurbolenta)
    
@@ -190,7 +192,8 @@ function saveAircraft() {
                 standardCertificate: standardCertificate,
                 dateExpireCAircraft: dateExpireCAircraft,
                 estelaTurbolenta: estelaTurbolenta,
-                TelemergencyEquipment: TelemergencyEquipment
+                TelemergencyEquipment: TelemergencyEquipment,
+                UserOwner: UserOwner
             }
         }).then(data=>{
             //console.log(data["error"])

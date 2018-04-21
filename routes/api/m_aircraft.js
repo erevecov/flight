@@ -53,6 +53,7 @@ const TestAircraft = [
         let dateExpireCAircraft=request.payload.dateExpireCAircraft ;
         let estelaTurbolenta=request.payload.estelaTurbolenta ;
         let TelemergencyEquipment=request.payload.TelemergencyEquipment ;
+        let UserOwner=request.payload.UserOwner;
         let newAirplane = {};
 
 
@@ -83,15 +84,15 @@ const TestAircraft = [
                 newAirplane.typeAircraft = typeAircraft;
                 newAirplane.aircraftCertificate = aircraftCertificate;
                 newAirplane.maxTakeoff = maxTakeoff;
-                newAirplane.serialNumber = serialNumber;
+                newAirplane.serialNumber = serialNumber; 
                 newAirplane.standardCertificate = standardCertificate;
                 newAirplane.dateExpireCAircraft = dateExpireCAircraft;
                 newAirplane.estelaTurbolenta = estelaTurbolenta;
                 newAirplane.TelemergencyEquipment = TelemergencyEquipment;
-
-
-
-               
+                newAirplane.UserOwner = UserOwner;
+  
+         
+                     
                 db.insert(newAirplane, function(errUpdate, body) {
                   if (errUpdate) throw errUpdate;
 
@@ -116,7 +117,8 @@ const TestAircraft = [
                 standardCertificate: Joi.string(),
                 dateExpireCAircraft: Joi.date(),
                 estelaTurbolenta: Joi.string(),
-                TelemergencyEquipment: Joi.string()
+                TelemergencyEquipment: Joi.string(),
+                UserOwner: Joi.string()
 
         })
       }
